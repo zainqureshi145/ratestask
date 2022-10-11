@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from db_util import get_location_codes, calculate_average_prices
 from dateutil.parser import parse
+from werkzeug.exceptions import NotFound
+from flask import abort
 
 # Init app
 app = Flask(__name__)
@@ -8,12 +10,12 @@ app = Flask(__name__)
 # Define endpoints
 @app.route('/rates', methods=['GET'])
 def get_rates():
-    date_from = request.args.get('date_from', None)
-    date_to = request.args.get('date_to', None)
-    origin = request.args.get('origin', None)
-    destination = request.args.get('destination', None)
+    print("Hello World")
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    origin = request.args.get('origin')
+    destination = request.args.get('destination')
 
-# Get location codes
     orig_code = get_location_codes(origin)
     dest_code = get_location_codes(destination)
 # Get average prices
