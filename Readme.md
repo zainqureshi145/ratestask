@@ -9,6 +9,10 @@ I have used psql to import the database dump into rates database using this comm
 ```bash
 psql -U postgres -d rates -1 -f rates.sql
 ```
+## .env file
+
+Create a .env file in the root directory of the project which stores database username and password. 
+
 ## Docker
 
 If you want to run it in a docker container:
