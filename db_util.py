@@ -2,7 +2,7 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# Create Databse Connection
+# Create databse connection
 def get_db_connection():
     connection = psycopg2.connect(
         host='localhost',
@@ -13,7 +13,7 @@ def get_db_connection():
 
     return connection
 
-# Get Location Codes
+# Get location codes
 def get_location_codes(location):
     connection = get_db_connection()
     cur = connection.cursor()
@@ -29,27 +29,34 @@ def get_location_codes(location):
     code = cur.fetchone()
     return code
 
-# Calculate Average Prices
+# Calculate average prices
 def calculate_average_prices(orig_code, dest_code, date_from, date_to):
     connection = get_db_connection()
     cur = connection.cursor(cursor_factory=RealDictCursor)
 
     params = (orig_code, dest_code, date_from, date_to,)
 
-    # Execute Raw Query
+    # Execute raw query
     cur.execute(f'''
-        SELECT ROUND(AVG(prices.price), 0) AS average_price, prices.day
+        SELECT prices.day,
+        
+        CASE
+            WHEN COUNT(prices.price) >= 3 THEN ROUND(AVG(prices.price), 0)
+            WHEN COUNT(prices.price) < 3 THEN NULL
+        END AS average_price
+
         FROM
+
         (SELECT *
         FROM regions
-        FULL OUTER JOIN ports
+        INNER JOIN ports
         ON regions.parent_slug = ports.parent_slug) AS result
-        INNER JOIN prices
+
+        FULL OUTER JOIN prices
         ON prices.orig_code = result.code
         WHERE prices.orig_code = (%s) AND prices.dest_code = (%s) AND day BETWEEN (%s) AND (%s)
         GROUP BY prices.day;
         ''', params)
-
 
     results = cur.fetchall()
 
